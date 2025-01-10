@@ -90,9 +90,7 @@ export const AnimatedSizeView = (props: Props) => {
 
    const animatedVisibility = useSharedValue(hasChildren ? 1 : 0);
    const transitionState = useSharedValue(
-      animatedVisibility.value
-         ? TransitionState.EXITING
-         : TransitionState.ENTERING,
+      hasChildren ? TransitionState.EXITING : TransitionState.ENTERING,
    );
    const currentLength = useSharedValue(0);
 
