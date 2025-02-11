@@ -14,7 +14,6 @@ import Animated, {
    useAnimatedStyle,
    useSharedValue,
 } from 'react-native-reanimated';
-import { SpringConfig } from 'react-native-reanimated/lib/typescript/animation/springUtils';
 
 import { useResettablePersistedValue } from './hooks';
 import { withAnimation } from './utils';
@@ -50,7 +49,7 @@ interface Props {
    /**
     * Spring config for the animation.
     */
-   animationConfig?: SpringConfig;
+   animationConfig?: WithSpringConfig;
    /**
     * Optional ViewStyle to pass to the container. Won't have any
     * impact on the `children` content.
