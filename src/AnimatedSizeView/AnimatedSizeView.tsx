@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useRef } from 'react';
 import {
    LayoutChangeEvent,
    StyleProp,
@@ -87,6 +87,7 @@ export const AnimatedSizeView = (props: Props) => {
    const hasChildren = !!children;
    const isHeightBased = dimension === 'height';
 
+   const contentContainerRef = useRef<View>(null);
    const animatedVisibility = useSharedValue(hasChildren ? 1 : 0);
    const transitionState = useSharedValue(
       hasChildren ? TransitionState.EXITING : TransitionState.ENTERING,
@@ -150,6 +151,19 @@ export const AnimatedSizeView = (props: Props) => {
       return output;
    });
 
+   /**
+    * Perform initial measurement of the content container.
+    */
+   useLayoutEffect(() => {
+      contentContainerRef.current?.measure((_x, _y, width, height) => {
+         currentLength.value = dimension === 'width' ? width : height;
+      });
+   }, [currentLength, dimension]);
+
+   /**
+    * Handle triggering the exit/enter animations when the value of
+    * `hasChildren` changes.
+    */
    useEffect(() => {
       const toValue = hasChildren ? 1 : 0;
       transitionState.value = toValue
@@ -184,6 +198,7 @@ export const AnimatedSizeView = (props: Props) => {
          ]}
       >
          <View
+            ref={contentContainerRef}
             onLayout={onContentLayout}
             style={[
                styles.contentContainer,
