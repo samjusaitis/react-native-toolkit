@@ -1,18 +1,17 @@
-import { ReactNode, useEffect, useLayoutEffect, useRef } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
    LayoutChangeEvent,
    StyleProp,
-   ViewStyle,
    StyleSheet,
    View,
+   ViewStyle,
 } from 'react-native';
-
 import Animated, {
-   WithSpringConfig,
    interpolate,
    runOnJS,
    useAnimatedStyle,
    useSharedValue,
+   WithSpringConfig,
 } from 'react-native-reanimated';
 
 import { useResettablePersistedValue } from './hooks';
@@ -92,21 +91,28 @@ export const AnimatedSizeView = (props: Props) => {
    const transitionState = useSharedValue(
       hasChildren ? TransitionState.EXITING : TransitionState.ENTERING,
    );
-   const currentLength = useSharedValue(0);
+   const currentLength = useSharedValue<null | number>(null);
+   const [hasInitialised, setHasInitialised] = useState(false);
 
    const [persistedChildren, resetPersistedChildren] =
       useResettablePersistedValue(children);
 
    const onContentLayout = (event: LayoutChangeEvent) => {
+      if (currentLength.value === null) return;
+
       const length = event.nativeEvent.layout[dimension];
 
-      const isHiddenOrInitialising = currentLength.value === 0;
-      const animateChange =
+      const isCollapsed = currentLength.value === 0;
+      const shouldAnimateLengthChange =
          typeof animateSizeChanges === 'function'
             ? animateSizeChanges(length, currentLength.value)
             : animateSizeChanges;
 
-      if (!isHiddenOrInitialising && animateChange) {
+      /**
+       * Handle animating any length changes when this View is not in
+       * a collapsed state.
+       */
+      if (shouldAnimateLengthChange && !isCollapsed) {
          currentLength.value = withAnimation(length, animationConfig);
       } else {
          currentLength.value = length;
@@ -114,6 +120,10 @@ export const AnimatedSizeView = (props: Props) => {
    };
 
    const animatedContainerStyle = useAnimatedStyle(() => {
+      if (currentLength.value === null) {
+         return { opacity: 1 };
+      }
+
       const isExiting = transitionState.value === TransitionState.EXITING;
 
       const opacityInputRange = animateSizeBeforeOpacity
@@ -142,11 +152,7 @@ export const AnimatedSizeView = (props: Props) => {
 
       const output: StyleProp<ViewStyle> = { opacity };
 
-      if (isHeightBased) {
-         output.height = length;
-      } else {
-         output.width = length;
-      }
+      output[dimension] = length;
 
       return output;
    });
@@ -157,6 +163,7 @@ export const AnimatedSizeView = (props: Props) => {
    useLayoutEffect(() => {
       contentContainerRef.current?.measure((_x, _y, width, height) => {
          currentLength.value = dimension === 'width' ? width : height;
+         setHasInitialised(true);
       });
    }, [currentLength, dimension]);
 
@@ -201,6 +208,7 @@ export const AnimatedSizeView = (props: Props) => {
             ref={contentContainerRef}
             onLayout={onContentLayout}
             style={[
+               { position: hasInitialised ? 'absolute' : 'relative' },
                styles.contentContainer,
                isHeightBased
                   ? styles.contentContainerForHeight
@@ -225,7 +233,6 @@ const styles = StyleSheet.create({
       height: '100%',
    },
    contentContainer: {
-      position: 'absolute',
       top: 0,
       left: 0,
    },
