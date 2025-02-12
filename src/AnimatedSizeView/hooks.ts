@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useState } from 'react';
 
 /**
  * Hook that returns a persisted copy of the provided `value`. If
@@ -6,27 +6,28 @@ import { useCallback, useEffect, useReducer, useRef } from 'react';
  * `value`.
  */
 export function useResettablePersistedValue<T>(value: T) {
-   const persistedValue = useRef<T | undefined>(value || undefined);
+   /**
+    * Maintain the persisted value in state (rather than a ref) as the
+    * value of ref.current shouldn't be used in rendering.
+    */
+   const [persistedValue, setPersistedValue] = useState<T | undefined>(
+      value || undefined,
+   );
 
-   const [, reRender] = useReducer((prev) => prev + 1, 0);
-
+   /**
+    * Reset the persisted value and force a re-render.
+    */
    const reset = useCallback(() => {
-      const hasPersistedValue = !!persistedValue.current;
-      persistedValue.current = undefined;
-      if (hasPersistedValue) {
-         reRender();
-      }
+      setPersistedValue(undefined);
    }, []);
 
    /**
     * Maintain a copy of `value` in a ref to be able to persist it when
     * `value` becomes falsey.
     */
-   useEffect(() => {
-      if (value) {
-         persistedValue.current = value;
-      }
-   }, [value]);
+   if (value && persistedValue !== value) {
+      setPersistedValue(value);
+   }
 
-   return [value || persistedValue.current, reset] as const;
+   return [value || persistedValue, reset] as const;
 }
