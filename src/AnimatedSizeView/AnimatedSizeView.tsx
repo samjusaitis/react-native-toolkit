@@ -49,6 +49,7 @@ interface Props {
     * Spring config for the animation.
     */
    animationConfig?: WithSpringConfig;
+   pointerEvents?: ViewStyle['pointerEvents'];
    /**
     * Optional ViewStyle to pass to the container. Won't have any
     * impact on the `children` content.
@@ -81,6 +82,7 @@ export const AnimatedSizeView = (props: Props) => {
       animateSizeBeforeOpacity = false,
       animateSizeChanges = true,
       animationConfig = DEFAULT_ANIMATION_CONFIG,
+      pointerEvents,
    } = props;
 
    const hasChildren = !!children;
@@ -196,6 +198,7 @@ export const AnimatedSizeView = (props: Props) => {
 
    return (
       <Animated.View
+         pointerEvents={pointerEvents}
          style={[
             style,
             animatedContainerStyle,
@@ -206,6 +209,7 @@ export const AnimatedSizeView = (props: Props) => {
       >
          <View
             ref={contentContainerRef}
+            pointerEvents={pointerEvents}
             onLayout={onContentLayout}
             style={[
                { position: hasInitialised ? 'absolute' : 'relative' },
