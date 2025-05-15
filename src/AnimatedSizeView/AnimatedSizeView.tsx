@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
    LayoutChangeEvent,
    StyleProp,
@@ -12,6 +12,7 @@ import Animated, {
    useAnimatedStyle,
    useSharedValue,
    WithSpringConfig,
+   WithTimingConfig,
 } from 'react-native-reanimated';
 
 import { useResettablePersistedValue } from './hooks';
@@ -30,7 +31,7 @@ interface Props {
    dimension?: SizeDimension;
    /**
     * Whether to animate any changes in size once the `children` have
-    * become visible. Also accepts a callback that to determine the
+    * become visible. Also accepts a callback to determine the
     * value based on the current and previous size.
     *
     * @default: true
@@ -48,7 +49,7 @@ interface Props {
    /**
     * Spring config for the animation.
     */
-   animationConfig?: WithSpringConfig;
+   animationConfig?: WithTimingConfig | WithSpringConfig;
    pointerEvents?: ViewStyle['pointerEvents'];
    /**
     * Optional ViewStyle to pass to the container. Won't have any
@@ -58,8 +59,8 @@ interface Props {
 }
 
 enum TransitionState {
-   'ENTERING' = 'entering',
-   'EXITING' = 'exiting',
+   ENTERING = 'entering',
+   EXITING = 'exiting',
 }
 
 const DEFAULT_ANIMATION_CONFIG: WithSpringConfig = {
@@ -100,9 +101,18 @@ export const AnimatedSizeView = (props: Props) => {
       useResettablePersistedValue(children);
 
    const onContentLayout = (event: LayoutChangeEvent) => {
-      if (currentLength.value === null) return;
-
       const length = event.nativeEvent.layout[dimension];
+
+      /**
+       * TODO[NEW_ARCHITECTURE]: uncomment this and remove the early
+       * return below when we can use the New Architecture
+       */
+      // if (currentLength.value === null) return;
+      if (currentLength.value === null) {
+         currentLength.value = length;
+         setHasInitialised(true);
+         return;
+      }
 
       const isCollapsed = currentLength.value === 0;
       const shouldAnimateLengthChange =
@@ -161,13 +171,16 @@ export const AnimatedSizeView = (props: Props) => {
 
    /**
     * Perform initial measurement of the content container.
+    *
+    * TODO[NEW_ARCHITECTURE]: re-instate this initialisation when we
+    * can use the New Architecture
     */
-   useLayoutEffect(() => {
-      contentContainerRef.current?.measure((_x, _y, width, height) => {
-         currentLength.value = dimension === 'width' ? width : height;
-         setHasInitialised(true);
-      });
-   }, [currentLength, dimension]);
+   // useLayoutEffect(() => {
+   //     contentContainerRef.current?.measure((_x, _y, width, height) => {
+   //         currentLength.value = dimension === 'width' ? width : height;
+   //         setHasInitialised(true);
+   //     });
+   // }, [currentLength, dimension]);
 
    /**
     * Handle triggering the exit/enter animations when the value of
