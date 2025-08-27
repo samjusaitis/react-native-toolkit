@@ -8,7 +8,7 @@
    "license": "MIT",
    "type": "module",
    "scripts": {
-      "lint": "npx eslint --cache --ext .js,.ts,.jsx,.tsx ./ && npx tsc --noemit",
+      "lint": "npx eslint . --cache & npx tsc --noemit",
       "release:minor": "bun lint && bun pm version minor",
       "release:patch": "bun lint && bun pm version patch"
    },
