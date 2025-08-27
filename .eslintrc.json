@@ -18,7 +18,7 @@
       "sourceType": "module",
       "allowImportExportEverywhere": true
    },
-   "plugins": ["react", "react-native", "react-compiler", "@typescript-eslint"],
+   "plugins": ["react", "react-native", "@typescript-eslint"],
    "settings": {
       "react": {
          "version": "18.2"

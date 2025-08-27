@@ -9,8 +9,8 @@
    "type": "module",
    "scripts": {
       "lint": "npx eslint --cache --ext .js,.ts,.jsx,.tsx ./ && npx tsc --noemit",
-      "release": "yarn lint && yarn version --minor",
-      "release:patch": "yarn lint && yarn version --patch"
+      "release:minor": "bun lint && bun pm version minor",
+      "release:patch": "bun lint && bun pm version patch"
    },
    "peerDependencies": {
       "react": "^18.2",
@@ -25,7 +25,6 @@
       "eslint": "^8.57.0",
       "eslint-config-prettier": "^9.1.0",
       "eslint-plugin-react": "^7.35.0",
-      "eslint-plugin-react-compiler": "^0.0.0-experimental-9ed098e-20240725",
       "eslint-plugin-react-hooks": "~4.6.0",
       "eslint-plugin-react-native": "~4.1.0",
       "prettier": "^3.3.3",
