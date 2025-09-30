@@ -67,7 +67,6 @@ const DEFAULT_ANIMATION_CONFIG: WithSpringConfig = {
    mass: 1,
    damping: 25,
    stiffness: 100,
-   restDisplacementThreshold: 0.01,
 };
 
 /**
